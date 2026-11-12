@@ -1,0 +1,11 @@
+node_modules/
+dist/
+data/
+.env
+*.sqlite
+*.sqlite-*
+
+TODO.md
+.claude/
+CLAUDE.md
+CLAUDE.local.md

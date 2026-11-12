@@ -1,0 +1,2 @@
+export const CATEGORY_CHANNEL_LIMIT = 50;
+export const EMBED_DESCRIPTION_LIMIT = 4096;
