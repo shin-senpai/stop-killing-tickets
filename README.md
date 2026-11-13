@@ -49,14 +49,14 @@ The documentation uses these terms. Use each term only with this description.
 
 ## Quick start
 
-You need Node.js 22.12 or later and a Discord bot application.
+You need Node.js 24.21.0 (see `.nvmrc`) and a Discord bot application.
 
 1. Create the bot in the Discord Developer Portal. Refer to the [setup guide](docs/setup-guide.md).
 2. Turn on the privileged intents **Server Members Intent** and **Message Content Intent**.
 3. Install the dependencies:
 
    ```sh
-   npm install
+   npm ci
    ```
 
 4. Copy `.env.example` to `.env`.
@@ -116,7 +116,7 @@ docs/            Documentation
 ## Technology
 
 - TypeScript
-- Node.js 22.12 or later
+- Node.js 24.21.0 (see `.nvmrc`)
 - discord.js 14
 - SQLite with `better-sqlite3` and Drizzle ORM
 - `discord-html-transcripts`

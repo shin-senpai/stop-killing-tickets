@@ -46,6 +46,23 @@ The bot also uses the partials `Message`, `Channel`, and `GuildMember`. With the
 
 The `overrides` field in `package.json` pins `react` and `react-dom` to 19.1.1. The transcript library needs this override because of a React version conflict. Do not remove it.
 
+All versions are fixed. A version must not change unless a person changes it on purpose.
+
+- `package.json` has exact versions, with no `^` or `~`.
+- `.npmrc` has `save-exact=true`. Thus, npm adds new packages with exact versions.
+- `package-lock.json` fixes every package, also the packages that other packages need. Each entry has a SHA-512 integrity hash and comes from `registry.npmjs.org`.
+- `.nvmrc` fixes the Node.js version.
+- The Docker sample in the setup guide fixes the base image with a digest (`@sha256:…`).
+
+Use `npm ci` to install. `npm ci` installs only the versions in the lockfile, and it stops if a hash is not correct. Do not use `npm install` or `npm update` without a version.
+
+To upgrade a package, do these steps:
+
+1. Run `npm install <package>@<exact-version>`.
+2. Examine the changes in `package-lock.json`.
+3. Run `npm run typecheck` and `npm test`.
+4. Commit `package.json` and `package-lock.json` together.
+
 ## 2. Module layout
 
 ```

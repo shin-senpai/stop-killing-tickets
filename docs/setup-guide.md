@@ -25,7 +25,7 @@ For the terms in this guide (hub server, client server, intake channel), refer t
 
 | Item | Requirement |
 |---|---|
-| Node.js | Version 22.12 or later. |
+| Node.js | Version 24.21.0. The file `.nvmrc` has this version. |
 | npm | The version that comes with Node.js. |
 | Build tools | Python 3, `make`, and a C++ compiler. `better-sqlite3` needs these tools only if no prebuilt binary is available for your system. |
 | Disk | A persistent folder for the SQLite database file. |
@@ -120,10 +120,10 @@ Use the same invite link for the hub server and for all client servers.
 2. Install the dependencies:
 
    ```sh
-   npm install
+   npm ci
    ```
 
-If `npm install` fails on `better-sqlite3`, install the build tools from section 1. Run `npm install` again.
+If `npm ci` fails on `better-sqlite3`, install the build tools from section 1. Run `npm ci` again.
 
 ## 6. Set up the .env file
 
@@ -200,7 +200,7 @@ To stop the bot, push **Ctrl+C**.
 1. Install the dependencies:
 
    ```sh
-   npm install
+   npm ci
    ```
 
 2. Compile the TypeScript files to `dist/`:
@@ -243,7 +243,7 @@ Use this method on a Linux server with systemd. The example uses the folder `/op
 
    ```sh
    cd /opt/stop-killing-tickets
-   sudo -u ticketbot npm install
+   sudo -u ticketbot npm ci
    sudo -u ticketbot npm run build
    sudo -u ticketbot mkdir -p data
    ```
@@ -311,7 +311,7 @@ Use this method if you use Docker and Docker Compose. Create the three files bel
 **Dockerfile**
 
 ```dockerfile
-FROM node:22-bookworm-slim AS build
+FROM node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS build
 WORKDIR /app
 # Build tools for better-sqlite3 if no prebuilt binary is available.
 RUN apt-get update \
@@ -323,7 +323,7 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
-FROM node:22-bookworm-slim
+FROM node:24.21.0-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/node_modules ./node_modules
@@ -453,7 +453,7 @@ CAUTION: Do not copy only `bot.sqlite` while the bot runs. The copy can be incom
 3. Install the dependencies:
 
    ```sh
-   npm install
+   npm ci
    ```
 
 4. Build the code:
@@ -564,7 +564,7 @@ NOTE: Any member can open a ticket, including client staff and admins. Thus, you
 | The login fails with an error about disallowed intents. | Turn on the privileged intents (section 3). |
 | The log shows `The bot is not in the hub server`. | Invite the bot to the hub server, or correct `HUB_GUILD_ID`. |
 | The commands do not show in Discord. | Make sure that the invite link has the `applications.commands` scope. Then reload Discord with **Ctrl+R**. Look for `Failed to register commands` in the log. |
-| `npm install` fails on `better-sqlite3`. | Make sure that Node.js is version 22.12 or later. Install the build tools from section 1. |
+| `npm ci` fails on `better-sqlite3`. | Make sure that Node.js is version 24.21.0 (see `.nvmrc`). Install the build tools from section 1. |
 | The reply of `/setup` shows "I couldn’t reach the support team". | The hub log channel is not set. Run `/hub setup` in the hub server. Then run `/setup` in the client server again. |
 | Messages in the intake channel do not open tickets. | Make sure that the client server is `active`. Make sure that the test account is not client staff. Run `/config check`. |
 | The bot cannot create a ticket channel. | The category can be full, or the bot can have missing permissions. Run `/config check`. Look at the alerts in the hub log channel. |
