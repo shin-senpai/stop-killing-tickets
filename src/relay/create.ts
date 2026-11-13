@@ -10,7 +10,7 @@ import { fetchTicketChannel } from './channels.js';
 import { authorEmbeds } from './embeds.js';
 import { isHubNote, isRelayableSource } from './filters.js';
 import { renderRelayContent, splitAttachmentsFor } from './render.js';
-import { findCopies, getActiveTicket, insertMessageLink } from './repo.js';
+import { findCopies, getRelayedTicket, insertMessageLink } from './repo.js';
 import { channelIdOf, lastRelayedChanges, otherSide } from './sides.js';
 import { sendWithWebhook } from './webhooks.js';
 
@@ -45,7 +45,7 @@ async function relayNewMessage(
   side: TicketSide,
   options: RelayOptions,
 ): Promise<void> {
-  const ticket = getActiveTicket(ticketId);
+  const ticket = getRelayedTicket(ticketId);
   // Catch-up and the live event can both see the same message.
   if (!ticket || findCopies(message.id).length > 0) return;
 

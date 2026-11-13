@@ -37,5 +37,9 @@
     "esbuild@0.18.20": true,
     "esbuild@0.25.12": true,
     "esbuild@0.28.2": true
+  },
+  "overrides": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
   }
 }

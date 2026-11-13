@@ -15,11 +15,12 @@ function useOrCreate(
   chosen: TextChannel | null,
   currentId: string | null,
   defaultName: string,
+  option: string,
 ): Promise<TextChannel> {
   const existing = chosen ?? findTextChannel(guild, currentId);
   if (existing) return Promise.resolve(existing);
   return withChannelPermissionHint(
-    () => createStaffTextChannel(guild, defaultName),
+    () => createStaffTextChannel(guild, defaultName, option),
     `I couldn’t create #${defaultName}.`,
   );
 }
@@ -34,12 +35,14 @@ export async function setupHub(interaction: CommandInteraction): Promise<void> {
     options.getChannel('log-channel', false, [ChannelType.GuildText]),
     hub.logChannelId,
     'ticket-log',
+    'log-channel',
   );
   const transcripts = await useOrCreate(
     guild,
     options.getChannel('transcript-channel', false, [ChannelType.GuildText]),
     hub.transcriptChannelId,
     'ticket-transcripts',
+    'transcript-channel',
   );
   updateHubConfig({ logChannelId: log.id, transcriptChannelId: transcripts.id });
 

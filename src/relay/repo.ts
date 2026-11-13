@@ -46,16 +46,17 @@ export function deleteLinkByCopy(copyMessageId: string): void {
   db.delete(messageLinks).where(eq(messageLinks.copyMessageId, copyMessageId)).run();
 }
 
-function isActive(ticket: Ticket): boolean {
-  return ticket.status !== 'closed';
+/** Closed tickets, including those in the reopen grace period, are not relayed. */
+function isRelayed(ticket: Ticket): boolean {
+  return ticket.status === 'open';
 }
 
-export function findActiveTicketByChannel(channelId: string): TicketLocation | undefined {
+export function findRelayedTicketByChannel(channelId: string): TicketLocation | undefined {
   const location = findTicketByChannel(channelId);
-  return location && isActive(location.ticket) ? location : undefined;
+  return location && isRelayed(location.ticket) ? location : undefined;
 }
 
-export function getActiveTicket(ticketId: number): Ticket | undefined {
+export function getRelayedTicket(ticketId: number): Ticket | undefined {
   const ticket = getTicket(ticketId);
-  return ticket && isActive(ticket) ? ticket : undefined;
+  return ticket && isRelayed(ticket) ? ticket : undefined;
 }

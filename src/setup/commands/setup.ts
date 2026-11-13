@@ -8,6 +8,7 @@ import {
   type Client,
   type Guild,
 } from 'discord.js';
+import { TICKET_CATEGORY_PERMISSIONS } from '../../core/permissions.js';
 import { getClientServer, updateClientServer } from '../../db/queries.js';
 import type { ClientServer } from '../../db/schema.js';
 import type { SlashCommand } from '../../core/module.js';
@@ -22,7 +23,7 @@ import { buildClientConfigEmbed } from '../configEmbed.js';
 import { requireServerAdmin } from '../guards.js';
 import { deleteIntakeMessage, refreshIntakeMessage } from '../intakeMessage.js';
 import { linkRequestExists, sendLinkRequest } from '../linkRequest.js';
-import { missingGuildPermissionLine, missingPermissionLine } from '../permissionReport.js';
+import { missingPermissionLine, missingServerPermissionLine } from '../permissionReport.js';
 import { insertClientServer, saveClientServer } from '../repo.js';
 import {
   applyStaffRolesToTickets,
@@ -148,8 +149,8 @@ function permissionWarnings(guild: Guild, server: ClientServer): string[] {
   const intake = findTextChannel(guild, server.intakeChannelId);
   const log = findTextChannel(guild, server.logChannelId);
   return [
-    missingGuildPermissionLine(guild.members.me),
-    category && missingPermissionLine(category),
+    missingServerPermissionLine(guild.members.me),
+    category && missingPermissionLine(category, TICKET_CATEGORY_PERMISSIONS),
     intake && missingPermissionLine(intake, INTAKE_CHANNEL_PERMISSIONS),
     log && missingPermissionLine(log, LOG_CHANNEL_PERMISSIONS),
   ].filter((line): line is string => Boolean(line));

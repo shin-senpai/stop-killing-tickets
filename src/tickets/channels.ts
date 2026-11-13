@@ -1,6 +1,5 @@
 import {
   ChannelType,
-  PermissionFlagsBits,
   type Client,
   type Guild,
   type GuildMember,
@@ -10,24 +9,18 @@ import {
 } from 'discord.js';
 import { isHubGuild } from '../core/hub.js';
 import { logger } from '../core/logger.js';
-import { missingBotPermissions } from '../core/permissions.js';
+import {
+  botGuildPermissions,
+  missingBotPermissions,
+  TICKET_CATEGORY_PERMISSIONS,
+} from '../core/permissions.js';
 import { padTicketNumber } from '../core/text.js';
 import type { Ticket, TicketSide } from '../db/schema.js';
 import { isUnknownResourceError } from '../core/discordErrors.js';
 import { fetchTicketChannel } from '../relay/channels.js';
 import { createInCategory } from './categories.js';
-import { clientTicketOverwrites, existingRoleIds } from './permissions.js';
-
-/** What the bot needs in a hub ticket channel, which gets its permissions from the category. */
-const HUB_CHANNEL_BOT_PERMISSIONS = [
-  PermissionFlagsBits.ViewChannel,
-  PermissionFlagsBits.SendMessages,
-  PermissionFlagsBits.EmbedLinks,
-  PermissionFlagsBits.AttachFiles,
-  PermissionFlagsBits.ReadMessageHistory,
-  PermissionFlagsBits.ManageMessages,
-  PermissionFlagsBits.ManageWebhooks,
-] as const;
+import { existingRoleIds } from './permissions.js';
+import { clientTicketOverwrites } from './ticketOverwrites.js';
 
 interface ClientChannelInput {
   categoryId: string;
@@ -39,18 +32,18 @@ interface ClientChannelInput {
 
 export function createClientTicketChannel(input: ClientChannelInput): Promise<TextChannel> {
   const guild = input.opener.guild;
-  const permissionOverwrites = clientTicketOverwrites({
-    guildId: guild.id,
-    botId: guild.client.user.id,
-    openerId: input.opener.id,
-    staffRoleIds: existingRoleIds(guild, input.staffRoleIds),
-  });
   return createInCategory(guild, input.categoryId, (parent) =>
     guild.channels.create({
       name: input.name,
       type: ChannelType.GuildText,
       parent,
-      permissionOverwrites,
+      permissionOverwrites: clientTicketOverwrites({
+        guildId: guild.id,
+        botId: guild.client.user.id,
+        botPermissions: botGuildPermissions(guild),
+        openerId: input.opener.id,
+        staffRoleIds: existingRoleIds(guild, input.staffRoleIds),
+      }),
       reason: `Ticket #${padTicketNumber(input.number)}`,
     }),
   );
@@ -76,7 +69,7 @@ export async function createHubTicketChannel(input: HubChannelInput): Promise<Te
       reason: `Ticket ${input.name}`,
     }),
   );
-  const missing = missingBotPermissions(channel, HUB_CHANNEL_BOT_PERMISSIONS);
+  const missing = missingBotPermissions(channel, TICKET_CATEGORY_PERMISSIONS);
   if (missing.length > 0) {
     await channel.delete().catch(() => undefined);
     throw new Error(

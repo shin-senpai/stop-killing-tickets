@@ -9,7 +9,7 @@ import { planCopyEdits } from './copyPlan.js';
 import { deleteAllCopies } from './delete.js';
 import { isHubNote } from './filters.js';
 import { renderRelayContent, splitAttachmentsFor } from './render.js';
-import { deleteCopyLink, findCopies, getActiveTicket, insertMessageLink } from './repo.js';
+import { deleteCopyLink, findCopies, getRelayedTicket, insertMessageLink } from './repo.js';
 import { channelIdOf, otherSide } from './sides.js';
 import { deleteCopy, editCopy, sendWithWebhook } from './webhooks.js';
 
@@ -22,7 +22,7 @@ export async function relayEdit(
   ticketId: number,
   side: TicketSide,
 ): Promise<void> {
-  const ticket = getActiveTicket(ticketId);
+  const ticket = getRelayedTicket(ticketId);
   const copies = findCopies(message.id);
   if (!ticket || copies.length === 0) return;
 

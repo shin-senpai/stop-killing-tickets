@@ -5,7 +5,7 @@ import type { Ticket, TicketSide } from '../db/schema.js';
 import { fetchTicketChannel } from './channels.js';
 import { handleSourceMessage } from './create.js';
 import type { KeyedSerialQueue } from '../core/serialQueue.js';
-import { getActiveTicket } from './repo.js';
+import { getRelayedTicket } from './repo.js';
 import { channelIdOf, lastRelayedOf } from './sides.js';
 
 const MAX_MISSED_PER_CHANNEL = 500;
@@ -31,7 +31,7 @@ export function scheduleCatchUp(discord: Client<true>, queue: KeyedSerialQueue<n
 }
 
 async function catchUpTicket(discord: Client<true>, ticketId: number, cutoff: number) {
-  const ticket = getActiveTicket(ticketId);
+  const ticket = getRelayedTicket(ticketId);
   if (!ticket) return;
 
   const missed: MissedMessage[] = [];

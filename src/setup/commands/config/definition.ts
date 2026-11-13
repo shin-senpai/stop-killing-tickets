@@ -72,6 +72,9 @@ export const configCommandData = new SlashCommandBuilder()
     sub.setName('intake-message').setDescription('Edit the instructions in the intake channel'),
   )
   .addSubcommand((sub) =>
+    sub.setName('intake-post').setDescription('Post an extra message in the intake channel'),
+  )
+  .addSubcommand((sub) =>
     sub
       .setName('limits')
       .setDescription('Change ticket limits (leave all empty to see them)')

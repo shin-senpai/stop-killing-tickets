@@ -15,7 +15,6 @@ import { EMBED_DESCRIPTION_LIMIT } from '../core/limits.js';
 import { padTicketNumber, truncate } from '../core/text.js';
 import type { Ticket } from '../db/schema.js';
 import { TicketComponentIds } from './ids.js';
-import { hubChannelName } from './names.js';
 
 const FIELD_LIMIT = 1024;
 
@@ -53,14 +52,16 @@ export function renderClientStarter(context: StarterContext): StarterMessage {
   const { ticket } = context;
   const embed = new EmbedBuilder()
     .setColor(statusColor(ticket))
-    .setTitle(`🎫 Ticket #${padTicketNumber(ticket.number)}`)
-    .setDescription(subjectText(ticket))
+    .setTitle(ticketTitle(ticket))
+    .setDescription(subjectQuote(ticket))
     .addFields(
+      { name: 'Opened by', value: userMention(ticket.openerId), inline: true },
       {
-        name: 'Opened by',
-        value: `${userMention(ticket.openerId)} · ${time(ticket.createdAt, TimestampStyles.ShortDateTime)}`,
+        name: 'Opened',
+        value: time(ticket.createdAt, TimestampStyles.ShortDateTime),
+        inline: true,
       },
-      { name: 'Status', value: clientStatus(ticket, context.helperLabel) },
+      { name: 'Status', value: clientStatus(ticket, context.helperLabel), inline: true },
       ...closeReasonFields(ticket),
       ...participantFields(context.participantIds),
     );
@@ -72,21 +73,26 @@ export function renderHubStarter(context: StarterContext): StarterMessage {
   const embed = new EmbedBuilder()
     .setColor(statusColor(ticket))
     .setAuthor({ name: context.serverName, iconURL: context.serverIconUrl ?? undefined })
-    .setTitle(`🎫 ${hubChannelName(context.tag, ticket.number)} · ${context.serverName}`)
-    .setDescription(subjectText(ticket))
+    .setTitle(ticketTitle(ticket))
+    .setDescription(subjectQuote(ticket))
     .addFields(
       {
         name: 'Opener',
-        value: [
-          `${userMention(opener.id)} (${escapeMarkdown(opener.username)} · ${opener.id})`,
-          accountLine(opener, context.serverName),
-          historyLine(context.history),
-        ].join('\n'),
+        value: `${userMention(opener.id)}\n${escapeMarkdown(opener.username)}`,
+        inline: true,
       },
-      { name: 'Status', value: hubStatus(ticket) },
+      {
+        name: 'Account created',
+        value: time(opener.createdAt, TimestampStyles.RelativeTime),
+        inline: true,
+      },
+      { name: 'Joined server', value: joinedText(opener), inline: true },
+      { name: 'Prior tickets', value: historyText(context.history), inline: true },
+      { name: 'Status', value: hubStatus(ticket), inline: true },
       ...closeReasonFields(ticket),
       ...participantFields(context.participantIds),
-    );
+    )
+    .setFooter({ text: `User ID: ${opener.id}` });
   return { embeds: [embed], components: [hubButtons(ticket)] };
 }
 
@@ -121,24 +127,31 @@ function statusColor(ticket: Ticket): number {
   return ticket.claimedBy ? Colors.claimed : Colors.open;
 }
 
-function subjectText(ticket: Ticket): string {
-  return truncate(ticket.subject.trim() || '(no text)', EMBED_DESCRIPTION_LIMIT);
+function ticketTitle(ticket: Ticket): string {
+  return `Ticket #${padTicketNumber(ticket.number)}`;
 }
 
-function accountLine(opener: OpenerProfile, serverName: string): string {
-  const created = `Account created ${time(opener.createdAt, TimestampStyles.RelativeTime)}`;
-  const joined = opener.joinedAt
-    ? `Joined ${escapeMarkdown(serverName)} ${time(opener.joinedAt, TimestampStyles.RelativeTime)}`
+function subjectQuote(ticket: Ticket): string {
+  const subject = escapeMarkdown(ticket.subject.trim() || '(no text)');
+  const quote = subject
+    .split('\n')
+    .map((line) => `> ${line}`)
+    .join('\n');
+  return truncate(quote, EMBED_DESCRIPTION_LIMIT);
+}
+
+function joinedText(opener: OpenerProfile): string {
+  return opener.joinedAt
+    ? time(opener.joinedAt, TimestampStyles.RelativeTime)
     : 'Not in the server anymore';
-  return `${created} · ${joined}`;
 }
 
-function historyLine(history: OpenerHistory): string {
-  if (history.priorCount === 0) return 'Prior tickets: none';
+function historyText(history: OpenerHistory): string {
+  if (history.priorCount === 0) return 'None';
   const lastClosed = history.lastClosedAt
-    ? ` (last closed ${time(history.lastClosedAt, TimestampStyles.RelativeTime)})`
+    ? `\nLast closed ${time(history.lastClosedAt, TimestampStyles.RelativeTime)}`
     : '';
-  return `Prior tickets: ${history.priorCount}${lastClosed}`;
+  return `${history.priorCount}${lastClosed}`;
 }
 
 function closeReasonFields(ticket: Ticket): APIEmbedField[] {

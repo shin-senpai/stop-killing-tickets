@@ -1,15 +1,21 @@
 import {
   PermissionFlagsBits,
   PermissionsBitField,
+  type Guild,
   type GuildChannel,
   type PermissionResolvable,
 } from 'discord.js';
 
-/** Permissions the bot needs in every server. Used for the invite link and health checks. */
-export const BOT_PERMISSIONS = [
+/**
+ * The bot's role needs these server-wide. Discord only lets a bot set overwrites
+ * on a new channel for permissions it has in the server, not in the category,
+ * and only administrators may put Manage Permissions in a channel overwrite.
+ * Nothing beyond this set is checked or asked for.
+ */
+export const BOT_SERVER_PERMISSIONS = [
   PermissionFlagsBits.ViewChannel,
   PermissionFlagsBits.ManageChannels,
-  // Required to edit channel permission overwrites.
+  // Shown as Manage Permissions on channels: needed to edit ticket channel overwrites.
   PermissionFlagsBits.ManageRoles,
   PermissionFlagsBits.ManageWebhooks,
   PermissionFlagsBits.SendMessages,
@@ -18,6 +24,28 @@ export const BOT_PERMISSIONS = [
   PermissionFlagsBits.ReadMessageHistory,
   PermissionFlagsBits.ManageMessages,
   PermissionFlagsBits.AddReactions,
+] as const;
+
+export const INVITE_PERMISSIONS = new PermissionsBitField([...BOT_SERVER_PERMISSIONS]).bitfield;
+
+/** Needed on a ticket category in a client server and in the hub. A category can deny what the role allows. */
+export const TICKET_CATEGORY_PERMISSIONS = BOT_SERVER_PERMISSIONS;
+
+export const INTAKE_CHANNEL_PERMISSIONS = [
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.SendMessages,
+  PermissionFlagsBits.EmbedLinks,
+  PermissionFlagsBits.ReadMessageHistory,
+  PermissionFlagsBits.ManageMessages,
+  PermissionFlagsBits.AddReactions,
+] as const;
+
+/** Needed on the log channels and on the hub transcript channel. */
+export const LOG_CHANNEL_PERMISSIONS = [
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.SendMessages,
+  PermissionFlagsBits.EmbedLinks,
+  PermissionFlagsBits.AttachFiles,
 ] as const;
 
 /** Permissions given to the opener and participants in a client ticket channel. */
@@ -35,14 +63,44 @@ export const TICKET_STAFF_PERMISSIONS = [
   PermissionFlagsBits.ManageMessages,
 ] as const;
 
+/** Names of the permissions in `required` that are not in `held`. */
+export function missingPermissionNames(
+  held: Readonly<PermissionsBitField>,
+  required: readonly PermissionResolvable[],
+): string[] {
+  return new PermissionsBitField(required as PermissionResolvable[])
+    .toArray()
+    .filter((name) => !held.has(name));
+}
+
+/**
+ * The part of `wanted` the bot may put in an overwrite: Discord rejects anything
+ * the bot lacks server-wide, and Manage Permissions unless the bot is an administrator.
+ */
+export function grantablePermissions(
+  held: Readonly<PermissionsBitField>,
+  wanted: readonly bigint[],
+): bigint[] {
+  const isAdmin = held.has(PermissionFlagsBits.Administrator);
+  return wanted.filter(
+    (permission) =>
+      held.has(permission) && (isAdmin || permission !== PermissionFlagsBits.ManageRoles),
+  );
+}
+
 export function missingBotPermissions(
   channel: GuildChannel,
-  required: readonly PermissionResolvable[] = BOT_PERMISSIONS,
+  required: readonly PermissionResolvable[],
 ): string[] {
   const me = channel.guild.members.me;
   if (!me) return ['(bot member not cached)'];
-  const have = channel.permissionsFor(me);
-  return new PermissionsBitField(required as PermissionResolvable[])
-    .toArray()
-    .filter((name) => !have.has(name));
+  return missingPermissionNames(channel.permissionsFor(me), required);
+}
+
+export function botGuildPermissions(guild: Guild): Readonly<PermissionsBitField> {
+  return guild.members.me?.permissions ?? new PermissionsBitField();
+}
+
+export function permissionNames(permissions: readonly bigint[]): string[] {
+  return new PermissionsBitField([...permissions]).toArray();
 }

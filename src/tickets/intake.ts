@@ -13,7 +13,6 @@ import { Colors } from '../core/colors.js';
 import { fetchHubGuild, isHubGuild, sendHubLog } from '../core/hub.js';
 import { logger } from '../core/logger.js';
 import { sendTempNotice } from '../core/notices.js';
-import { isClientStaff } from '../core/staff.js';
 import { truncate } from '../core/text.js';
 import { getClientServer, isBlacklisted } from '../db/queries.js';
 import type { ClientServer } from '../db/schema.js';
@@ -43,7 +42,7 @@ async function handleIntakeMessage(message: Message): Promise<void> {
   if (!server || server.intakeChannelId !== message.channelId) return;
   const member =
     message.member ?? (await message.guild.members.fetch(message.author.id).catch(() => null));
-  if (!member || isClientStaff(member, server)) return;
+  if (!member) return;
 
   const unavailable = unavailableNotice(server);
   if (unavailable) return reject(message, unavailable);

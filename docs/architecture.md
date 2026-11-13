@@ -42,6 +42,10 @@ On `SIGINT` or `SIGTERM`, the bot closes the Discord connection and the database
 
 The bot also uses the partials `Message`, `Channel`, and `GuildMember`. With these partials, the bot receives edit and delete events for messages that were sent before a restart.
 
+### Dependencies
+
+The `overrides` field in `package.json` pins `react` and `react-dom` to 19.1.1. The transcript library needs this override because of a React version conflict. Do not remove it.
+
 ## 2. Module layout
 
 ```
@@ -266,6 +270,10 @@ The relay ignores each message that has a `webhookId` and each message from the 
 
 The relay also ignores hub messages that start with the note prefix. These messages are internal notes.
 
+### Relay only while open
+
+The relay handles a ticket only while its status is `open` (`isRelayed` in `src/relay/repo.ts`). During the reopen grace period (`closing`) and after it, the relay does not handle new messages, edits, or deletes. A reopen sets the status to `open`, and the relay starts again.
+
 ### Message links
 
 The `message_links` table connects each source message to its relayed copies. One source message can have more than one copy, one copy for each text part. `copy_index` is the number of the part.
@@ -286,7 +294,7 @@ Each ticket has one queue (`KeyedSerialQueue` from `src/core/serialQueue.ts`, ke
 
 The `tickets` table keeps the ID of the last relayed message from each side (`last_relayed_client_message_id`, `last_relayed_hub_message_id`). The relay updates these IDs after each relayed message.
 
-When the client is ready, the relay queues one catch-up job for each `open` or `closing` ticket. These jobs go into the queue before any live message. The catch-up job does these steps:
+When the client is ready, the relay queues one catch-up job for each open ticket. These jobs go into the queue before any live message. The catch-up job does these steps:
 
 1. Get the messages after the last relayed ID in each of the two ticket channels. The maximum is 500 messages for each channel.
 2. Sort the messages of the two sides by ID.

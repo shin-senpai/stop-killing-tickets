@@ -85,7 +85,7 @@ function closedCategoryFor(
   const existing = chosen ?? findCategory(guild, hub.closedCategoryId);
   if (existing) return Promise.resolve(existing);
   return withChannelPermissionHint(
-    () => createStaffCategory(guild, 'Closed Tickets'),
+    () => createStaffCategory(guild, 'Closed Tickets', 'closed-category'),
     'I couldn’t create a category for closed tickets.',
   );
 }

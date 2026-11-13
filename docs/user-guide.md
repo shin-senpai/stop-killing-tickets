@@ -43,10 +43,11 @@ Other members of the server cannot see your ticket.
 
 The bot pins a starter message at the top of the ticket channel. The starter message shows:
 
-- The ticket number.
-- Your subject.
-- Who opened the ticket and when.
-- The status of the ticket.
+- The ticket number in the title.
+- Your subject, as a quote.
+- **Opened by**: who opened the ticket.
+- **Opened**: the date and time.
+- **Status**: the status of the ticket.
 - The participants, if there are participants.
 - The **👥 Add people** and **🔒 Close** buttons.
 
@@ -145,6 +146,7 @@ After the close, these things occur:
 - The bot posts a notice in the ticket, for example "🔒 Ticket closed by @You."
 - The notice also shows the reason and the time when the bot deletes the channel.
 - You and the participants cannot send messages in the ticket channel.
+- The bot does not send messages between the two servers during this period. This includes new messages, edits, and deletes.
 - The status shows "🟠 Closed · Can be reopened until" and a time.
 - A **🔓 Reopen** button shows in the starter message for a short period (usually 10 minutes).
 - At the end of this period, the bot deletes the ticket channel.
@@ -221,7 +223,7 @@ Use this table if the bot does not open a ticket or does not answer.
 | The notice shows a message about a pause. | The support team stopped new tickets for a period. | Try again later. Your open tickets continue to operate. |
 | The notice says "Support is unavailable right now". | The server is not connected to the support team. | Tell the server staff. |
 | The notice says "we couldn't open a ticket right now". | An error occurred. The staff got a notification. | Wait a few minutes. Try again. |
-| Your message stays in the intake channel and no ticket opens. | You are server staff, or the bot is offline. | Server staff cannot open tickets in the intake channel. Tell a different staff member, or try again later. |
+| Your message stays in the intake channel and no ticket opens. | The bot is offline, or the message is a post from the server staff. | Try again later. Tell the server staff if the problem continues. |
 | You cannot find your ticket channel. | The channel list is collapsed, or the ticket closed. | Open the ticket category in the channel list. Use the link in the notice. |
 | You cannot send messages in the ticket channel. | The ticket is closed. | Click **🔓 Reopen**, or open a new ticket. |
 | Nobody answers. | The support team is busy. | Wait. Do not open more tickets. Send more information in the same ticket. |

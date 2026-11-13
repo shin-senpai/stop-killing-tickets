@@ -71,7 +71,8 @@ You can run `/setup` again at any time. The bot keeps the settings that you do n
 | `/config staff-roles remove <role>` | Removes a client staff role. The bot also removes the access of the role from the open tickets. |
 | `/config staff-roles list` | Shows the client staff roles. |
 | `/config log-channel [channel]` | Sets the client log channel. If you do not set `channel`, the bot turns off the log. |
-| `/config intake-message` | Opens a form to edit the instruction text in the intake channel. |
+| `/config intake-message` | Opens a form to edit the pinned instruction text in the intake channel. |
+| `/config intake-post` | Opens a form with one text field. The bot posts the text as an embed in the intake channel. |
 | `/config limits [options]` | Changes the ticket limits. If you do not set an option, the bot shows the current limits. |
 | `/config dm-transcripts <enabled>` | Turns the transcripts by DM to the opener on or off. |
 | `/config check` | Does a health check of the channels, permissions, and staff roles. |
@@ -79,6 +80,8 @@ You can run `/setup` again at any time. The bot keeps the settings that you do n
 You cannot use @everyone or a role that belongs to an app as a staff role. If you delete a staff role in Discord, the bot removes it from the list automatically.
 
 The instruction text can have a maximum of 4,000 characters. To use the default text again, clear the field and submit the form.
+
+`/config intake-message` changes the pinned instruction embed. `/config intake-post` adds a new embed and does not change the pinned embed. The text of `/config intake-post` can have a maximum of 4,000 characters. Mentions in the text do not ping. A post from `/config intake-post` never opens a ticket. To delete a post, use the Manage Messages permission.
 
 The options of `/config limits`:
 
@@ -376,5 +379,4 @@ At startup, the bot looks for linked client servers that it is no longer in. It 
 | "This only works in the support team server." | You used a hub command in a client server. Use it in the hub server. |
 | "This server isn’t set up yet. Run `/setup` first." | Run `/setup` in the client server. |
 | "Use this inside a ticket channel." | Use `/ticket` in a ticket channel. |
-| Staff messages in the intake channel do not open tickets. | This is correct. The bot ignores client staff in the intake channel. Use a different account to test. |
 | A deleted ticket channel | If a person deletes a ticket channel, the bot closes the ticket immediately. The bot makes a transcript from the other channel and deletes it. |

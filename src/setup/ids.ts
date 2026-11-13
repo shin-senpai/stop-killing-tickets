@@ -5,4 +5,5 @@ export const SetupComponentIds = {
   unlinkConfirm: 'setupUnlinkConfirm',
   unlinkCancel: 'setupUnlinkCancel',
   intakeTextModal: 'setupIntakeText',
+  intakePostModal: 'setupIntakePost',
 } as const;

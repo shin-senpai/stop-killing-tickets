@@ -11,7 +11,7 @@ import {
 } from '../../channels.js';
 import { statusLabel } from '../../format.js';
 import { requireClientServer } from '../../guards.js';
-import { missingGuildPermissionLine, missingPermissionLine } from '../../permissionReport.js';
+import { missingPermissionLine, missingServerPermissionLine } from '../../permissionReport.js';
 import { saveClientServer } from '../../repo.js';
 import { replyPrivately, type CommandInteraction } from '../subcommands.js';
 
@@ -75,7 +75,7 @@ export async function runHealthCheck(interaction: CommandInteraction): Promise<v
 
   const results = [
     `Status: ${statusLabel(server.status)}`,
-    missingGuildPermissionLine(guild.members.me) ?? '✅ My role has every permission I need.',
+    missingServerPermissionLine(guild.members.me) ?? '✅ My role has every permission I need.',
     ...checkCategory(guild, server),
     ...(await checkIntake(guild, server)),
     ...checkLogChannel(guild, server),

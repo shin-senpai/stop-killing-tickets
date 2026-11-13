@@ -102,7 +102,7 @@ Client server statuses:
 
 When a message arrives in the intake channel of a client server, the bot does these steps:
 
-1. **Ignore** system messages and messages from bots, webhooks, and the bot itself. Also ignore messages from client staff. Thus, client staff can post in the intake channel and not open tickets.
+1. **Ignore** system messages and messages from bots, webhooks, and the bot itself. The message of any other member opens a ticket. This includes client staff.
 2. **Examine the status.** If the client server is not `active`, delete the message. Post the notice for the status (section 3.2).
 3. **Lock for each user.** If a ticket for this user is in creation, delete the message. The notice says "your ticket is already being set up."
 4. **Validate** the message. If a check fails, delete the message and post a temporary notice. The notice deletes itself after approximately 10 seconds. Normal messages cannot be ephemeral, thus the bot uses a temporary notice. The checks are:
@@ -139,13 +139,14 @@ When a message arrives in the intake channel of a client server, the bot does th
 ### Starter message (posted and pinned)
 
 ```
-🎫 Ticket #0042
-My payment failed and I was charged twice …
-Opened by: @User · <date and time>
-Status: 🟢 Open · Waiting for support
+Ticket #0042
+> My payment failed and I was charged twice …
+Opened by: @User   Opened: <date and time>   Status: 🟢 Open · Waiting for support
 Participants: @Friend            (only if there are participants)
 [👥 Add people]  [🔒 Close]
 ```
+
+The title is `Ticket #0042`. The description is the subject as a quote block. The embed has three inline fields: **Opened by**, **Opened**, and **Status**.
 
 When the ticket is closed, the status changes to "🟠 Closed · Can be reopened until <time>". The embed also shows the reason, and the buttons change to **[🔓 Reopen]**. At the end of the grace period, the status is "⚫ Closed" and the embed has no buttons.
 
@@ -181,16 +182,19 @@ Rules:
 
 ```
 Acme Gaming (author line with the server icon)
-🎫 acme-0042 · Acme Gaming
-My payment failed and I was charged twice …
-Opener: @User (username · 123…)
-  Account created 3 years ago · Joined Acme Gaming 2 months ago
-  Prior tickets: 2 (last closed 5 days ago)
-Status: 🟢 Open · Unclaimed
+Ticket #0042
+> My payment failed and I was charged twice …
+Opener: @User / username   Account created: 3 years ago   Joined server: 2 months ago
+Prior tickets: 2 (last closed 5 days ago)   Status: 🟢 Open · Unclaimed
+User ID: 123…                    (footer)
 [🙋 Claim]  [🔒 Close]  [📄 Info]
 ```
 
-If the opener left the client server, the account line shows "Not in the server anymore".
+The author line shows the name and the icon of the client server. It shows them only once. The title is `Ticket #0042`. The description is the subject as a quote block.
+
+The embed has five inline fields: **Opener** (mention and username), **Account created**, **Joined server**, **Prior tickets**, and **Status**. The footer shows `User ID: <id>`.
+
+If the opener left the client server, the **Joined server** field shows "Not in the server anymore".
 
 ### Claim a ticket
 
@@ -228,6 +232,7 @@ Staff must often discuss a ticket, and the user must not see this discussion. Th
 | Long messages (Nitro, 4,000 characters) | The bot splits them into parts of 2,000 characters or fewer. |
 | Embeds | Discord makes link previews again from the relayed text. The bot copies the other embeds of the message (maximum 10). |
 | Reactions, pins, threads, system messages | Not relayed. Only normal messages and replies from people are relayed. |
+| Messages while the ticket is not `open` | Not relayed. This includes new messages, edits, and deletes in the grace period and after it. |
 | Bot system events | Member added or removed, claim, close, reopen, and other events. The bot posts them directly as small embeds on each side. The bot does not relay them. |
 
 ### Names on relayed messages
@@ -253,7 +258,7 @@ The bot cleans webhook usernames. Discord rejects the substrings "discord" and "
 
 ### Catch-up after bot downtime
 
-Each ticket keeps the ID of the last relayed message from each side. At startup, the bot gets the messages after that ID in each open or closing ticket channel. The bot relays them in order, before new messages. Each of these messages gets the small line `sent while the bridge was offline`. The maximum is 500 messages for each channel. Thus, normally no message is lost when the bot restarts.
+Each ticket keeps the ID of the last relayed message from each side. At startup, the bot gets the messages after that ID in each open ticket channel. The bot relays them in order, before new messages. Each of these messages gets the small line `sent while the bridge was offline`. The maximum is 500 messages for each channel. Thus, normally no message is lost when the bot restarts.
 
 ---
 
@@ -272,7 +277,7 @@ In the client ticket channel, the opener and client staff can close a ticket. In
    - Transcript channel in the hub server: a transcript of the **hub** ticket channel. It has the two sides of the conversation and the internal notes.
    - Client log channel (if set): a transcript of the client ticket channel. It does not include internal notes.
    - DM to the opener: the same client transcript (`dm_transcripts`, default on), with the text "Your ticket in **Server** was closed." The bot ignores DM failures.
-5. The two starter messages show **[🔓 Reopen]** during the **grace period** (`grace_minutes`, default 10).
+5. The two starter messages show **[🔓 Reopen]** during the **grace period** (`grace_minutes`, default 10). The bot does not relay messages in the grace period.
 6. At the end of the grace period, the bot deletes the client ticket channel. For the hub ticket channel, `archive_mode` decides:
    - `delete` (default): the bot deletes the channel.
    - `move`: the bot moves the channel to the closed category (`Closed Tickets`) and deletes its webhook. If the move fails, the bot deletes the channel and sends an alert to the hub log channel.
@@ -281,7 +286,7 @@ If `grace_minutes` is 0, the scheduler ends the ticket at its next tick (within 
 
 ### Reopen
 
-During the grace period, the opener, client staff, or hub staff can reopen the ticket (button or `/ticket reopen`). The bot refuses a reopen by the opener if the opener already has `max_open_tickets` open tickets. Staff can always reopen. The bot gives the permissions back, clears `closed_at`, and the status changes to `open`. The two sides get the notice "🔓 Ticket reopened by X." A new close sends new transcripts.
+During the grace period, the opener, client staff, or hub staff can reopen the ticket (button or `/ticket reopen`). The bot refuses a reopen by the opener if the opener already has `max_open_tickets` open tickets. Staff can always reopen. The bot gives the permissions back, clears `closed_at`, and the status changes to `open`. The relay then starts again for new messages. The two sides get the notice "🔓 Ticket reopened by X." A new close sends new transcripts.
 
 After the bot deletes the channels, the user must open a new ticket. The hub starter embed shows "Prior tickets: N" for context.
 
@@ -325,7 +330,8 @@ This section is a summary. The full reference with all options and limits is in 
 | `/config category <category>` | Sets the ticket category. |
 | `/config staff-roles add\|remove <role>`, `/config staff-roles list` | Changes the client staff roles. Also updates open tickets. |
 | `/config log-channel [channel]` | Sets the client log channel. No channel turns the log off. |
-| `/config intake-message` | Opens a modal to edit the text of the instruction embed. |
+| `/config intake-message` | Opens a modal to edit the text of the pinned instruction embed. |
+| `/config intake-post` | Opens a modal with one text field (maximum 4,000 characters). The bot posts the text as an embed in the intake channel. Mentions do not ping. These posts never open a ticket. |
 | `/config limits [max-open-tickets] [min-subject-length] [max-participants] [participants-can-add] [cooldown-seconds]` | Sets the limits. No options shows the limits. |
 | `/config dm-transcripts <enabled>` | Turns transcripts by DM on or off. |
 | `/config check` | Health check: permissions, missing channels, category capacity, staff roles. |

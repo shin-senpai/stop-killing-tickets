@@ -4,6 +4,7 @@ import { runSubcommand } from '../subcommands.js';
 import { setIntakeChannel, setLogChannel, setTicketCategory } from './channels.js';
 import { runHealthCheck } from './check.js';
 import { configCommandData } from './definition.js';
+import { openIntakePostModal } from './intakePost.js';
 import { openIntakeMessageModal } from './intakeMessage.js';
 import { setDmTranscripts, setLimits, viewConfig } from './settings.js';
 import { addStaffRole, listStaffRoles, removeStaffRole } from './staffRoles.js';
@@ -22,6 +23,7 @@ export const configCommand: SlashCommand = {
       'staff-roles list': listStaffRoles,
       'log-channel': setLogChannel,
       'intake-message': openIntakeMessageModal,
+      'intake-post': openIntakePostModal,
       limits: setLimits,
       'dm-transcripts': setDmTranscripts,
       check: runHealthCheck,
@@ -30,3 +32,4 @@ export const configCommand: SlashCommand = {
 };
 
 export { intakeTextModal } from './intakeMessage.js';
+export { intakePostModal } from './intakePost.js';

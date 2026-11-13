@@ -9,7 +9,10 @@ export async function withChannelPermissionHint<T>(
   try {
     return await action();
   } catch (error) {
+    if (error instanceof UserFacingError) throw error;
     logger.warn(failure, error);
-    throw new UserFacingError(`${failure} Check that I have Manage Channels and Manage Roles.`);
+    throw new UserFacingError(
+      `${failure} Check that I have Manage Channels and Manage Permissions on it.`,
+    );
   }
 }

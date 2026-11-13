@@ -64,13 +64,13 @@ NOTE: When the bot is in more than 100 servers, Discord requires verification of
 
 ## 4. Make the invite link
 
-The bot needs these permissions in each server. The list comes from `BOT_PERMISSIONS` in `src/core/permissions.ts`.
+The bot role needs these server-wide permissions in each server. The list comes from `BOT_SERVER_PERMISSIONS` in `src/core/permissions.ts`. The bot does not need Administrator or other permissions. The bot shows a warning only when a permission from this list is missing.
 
 | Permission | Use |
 |---|---|
 | View Channels | See the intake channel, ticket channels, and categories. |
 | Manage Channels | Create, rename, move, and delete ticket channels and categories. |
-| Manage Roles | Set the permission overwrites of ticket channels. |
+| Manage Roles | Set the permission overwrites of ticket channels. Discord shows it as Manage Permissions on channels. |
 | Manage Webhooks | Create and delete the webhook of each ticket channel. |
 | Send Messages | Post starter messages, notices, and transcripts. |
 | Embed Links | Post embeds. |
@@ -79,7 +79,9 @@ The bot needs these permissions in each server. The list comes from `BOT_PERMISS
 | Manage Messages | Delete intake messages and pin starter messages. |
 | Add Reactions | Mark internal notes with the 🔒 reaction. |
 
-The permission integer for this list is `805432400`. The scopes are `bot` and `applications.commands`.
+The permission integer for this list is `805432400`.
+
+NOTE: Discord lets a bot set permission overwrites on a new channel only for the permissions that the bot has in the server. Permissions on a category do not count. Thus, the bot role must have these permissions server-wide. The scopes are `bot` and `applications.commands`.
 
 Use one of these two methods to make the invite link.
 
@@ -548,7 +550,7 @@ A hub admin can also approve with the command `/clients approve <server> <tag> <
 7. Click **Close** in a ticket channel.
 8. Click **Close** again to confirm.
 
-NOTE: The bot ignores messages from client staff in the intake channel. Thus, a test with an admin account does not open a ticket.
+NOTE: Any member can open a ticket, including client staff and admins. Thus, you can use an admin account for the test.
 
 ## 14. Solve problems
 

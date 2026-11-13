@@ -7,7 +7,7 @@ import { relayDeletion } from './delete.js';
 import { relayEdit } from './edit.js';
 import { isRelayableSource } from './filters.js';
 import { KeyedSerialQueue } from '../core/serialQueue.js';
-import { findActiveTicketByChannel } from './repo.js';
+import { findRelayedTicketByChannel } from './repo.js';
 
 const queue = new KeyedSerialQueue<number>();
 
@@ -19,7 +19,7 @@ function enqueue(ticketId: number, action: string, job: () => Promise<void>): vo
 
 function onMessageCreate(message: Message): void {
   if (!message.inGuild() || !isRelayableSource(message)) return;
-  const location = findActiveTicketByChannel(message.channelId);
+  const location = findRelayedTicketByChannel(message.channelId);
   if (!location) return;
   const { ticket, side } = location;
   enqueue(ticket.id, 'create', () =>
@@ -29,7 +29,7 @@ function onMessageCreate(message: Message): void {
 
 function onMessageUpdate(oldMessage: Message | PartialMessage, newMessage: Message): void {
   if (newMessage.webhookId) return;
-  const location = findActiveTicketByChannel(newMessage.channelId);
+  const location = findRelayedTicketByChannel(newMessage.channelId);
   if (!location) return;
   const { ticket, side } = location;
   enqueue(ticket.id, 'edit', async () => {
@@ -42,7 +42,7 @@ function onMessageUpdate(oldMessage: Message | PartialMessage, newMessage: Messa
 }
 
 function onMessageDelete(discord: Client<true>, channelId: string, messageId: string): void {
-  const location = findActiveTicketByChannel(channelId);
+  const location = findRelayedTicketByChannel(channelId);
   if (!location) return;
   enqueue(location.ticket.id, 'delete', () => relayDeletion(discord, messageId));
 }

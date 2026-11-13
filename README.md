@@ -29,6 +29,8 @@ The documentation uses these terms. Use each term only with this description.
 - One hub server for the tickets of all client servers.
 - Users open a ticket with a normal message in the intake channel.
 - Messages, files, edits, deletes, and replies go in the two directions.
+- The bot relays messages only while a ticket is open. It does not relay messages in the reopen grace period.
+- Any member of a client server can open a ticket, including client staff.
 - Mentions never ping across servers.
 - Client staff can see and reply in the tickets of their server.
 - Optional hub staff roles limit who can claim, close, and write notes in the hub server.

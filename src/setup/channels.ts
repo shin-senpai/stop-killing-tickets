@@ -1,42 +1,44 @@
 import {
   ChannelType,
   PermissionFlagsBits,
-  PermissionsBitField,
   type CategoryChannel,
   type Guild,
   type OverwriteResolvable,
   type TextChannel,
 } from 'discord.js';
+import { UserFacingError } from '../core/errors.js';
+import {
+  botGuildPermissions,
+  grantablePermissions,
+  INTAKE_CHANNEL_PERMISSIONS,
+  LOG_CHANNEL_PERMISSIONS,
+  missingBotPermissions,
+  permissionNames,
+  TICKET_CATEGORY_PERMISSIONS,
+} from '../core/permissions.js';
 
-export const INTAKE_CHANNEL_PERMISSIONS = [
-  PermissionFlagsBits.ViewChannel,
-  PermissionFlagsBits.SendMessages,
-  PermissionFlagsBits.EmbedLinks,
-  PermissionFlagsBits.ReadMessageHistory,
-  PermissionFlagsBits.ManageMessages,
-] as const;
+export { INTAKE_CHANNEL_PERMISSIONS, LOG_CHANNEL_PERMISSIONS };
 
-export const LOG_CHANNEL_PERMISSIONS = [
-  PermissionFlagsBits.ViewChannel,
-  PermissionFlagsBits.SendMessages,
-  PermissionFlagsBits.EmbedLinks,
-  PermissionFlagsBits.AttachFiles,
-] as const;
+interface CreatedChannel {
+  /** What the admin sees in the message, for example "ticket category". */
+  description: string;
+  /** The command option that takes an existing channel instead. */
+  option: string;
+  /** What the bot needs on the channel the admin creates. */
+  permissions: readonly bigint[];
+}
 
-// Manage Roles is left out on purpose: Discord rejects an overwrite that grants
-// Manage Permissions unless the bot is an Administrator or already has it from
-// an overwrite. The bot's server-wide Manage Roles is enough to edit overwrites.
-const TICKET_CATEGORY_BOT_PERMISSIONS = [
-  PermissionFlagsBits.ViewChannel,
-  PermissionFlagsBits.ManageChannels,
-  PermissionFlagsBits.ManageWebhooks,
-  PermissionFlagsBits.SendMessages,
-  PermissionFlagsBits.EmbedLinks,
-  PermissionFlagsBits.AttachFiles,
-  PermissionFlagsBits.ReadMessageHistory,
-  PermissionFlagsBits.ManageMessages,
-  PermissionFlagsBits.AddReactions,
-] as const;
+/** Creating a category or a channel outside a category needs Manage Channels on the whole server. */
+function requireServerWideManageChannels(guild: Guild, created: CreatedChannel): void {
+  if (botGuildPermissions(guild).has(PermissionFlagsBits.ManageChannels)) return;
+  throw new UserFacingError(
+    [
+      `I can’t create the ${created.description}, because my role does not have Manage Channels.`,
+      `Create it yourself, then run the command again and choose it in the \`${created.option}\` option.`,
+      `Give me these permissions on it: ${permissionNames(created.permissions).join(', ')}.`,
+    ].join('\n'),
+  );
+}
 
 function botId(guild: Guild): string {
   return guild.client.user.id;
@@ -45,45 +47,80 @@ function botId(guild: Guild): string {
 function hiddenFromEveryone(guild: Guild, botAllow: readonly bigint[]): OverwriteResolvable[] {
   return [
     { id: guild.roles.everyone.id, deny: [PermissionFlagsBits.ViewChannel] },
-    { id: botId(guild), allow: [...botAllow] },
+    { id: botId(guild), allow: grantablePermissions(botGuildPermissions(guild), botAllow) },
   ];
 }
 
 export function createTicketCategory(guild: Guild): Promise<CategoryChannel> {
+  requireServerWideManageChannels(guild, {
+    description: 'ticket category',
+    option: 'category',
+    permissions: TICKET_CATEGORY_PERMISSIONS,
+  });
   return guild.channels.create({
     name: 'Tickets',
     type: ChannelType.GuildCategory,
-    permissionOverwrites: hiddenFromEveryone(guild, TICKET_CATEGORY_BOT_PERMISSIONS),
+    permissionOverwrites: hiddenFromEveryone(guild, TICKET_CATEGORY_PERMISSIONS),
     reason: 'Ticket setup',
   });
 }
 
+/** The bot must already have its permissions on the category: it cannot grant them to itself. */
 export async function lockTicketCategory(category: CategoryChannel): Promise<void> {
-  const { guild } = category;
+  const missing = missingBotPermissions(category, TICKET_CATEGORY_PERMISSIONS);
+  if (missing.length > 0) {
+    throw new UserFacingError(
+      `I’m missing these permissions on ${category}: ${missing.join(', ')}. Give them to me on the category and try again.`,
+    );
+  }
+  const guild = category.guild;
+  await category.permissionOverwrites.edit(
+    botId(guild),
+    Object.fromEntries(
+      permissionNames(
+        grantablePermissions(botGuildPermissions(guild), TICKET_CATEGORY_PERMISSIONS),
+      ).map((name) => [name, true]),
+    ),
+    { reason: 'Ticket setup' },
+  );
+  // A role permission does not survive an @everyone deny on the category, so the bot's own overwrite comes first.
   await category.permissionOverwrites.edit(
     guild.roles.everyone,
     { ViewChannel: false },
     { reason: 'Ticket setup' },
   );
-  const allow = Object.fromEntries(
-    new PermissionsBitField([...TICKET_CATEGORY_BOT_PERMISSIONS])
-      .toArray()
-      .map((name) => [name, true]),
-  );
-  await category.permissionOverwrites.edit(botId(guild), allow, { reason: 'Ticket setup' });
 }
 
 export function createIntakeChannel(guild: Guild): Promise<TextChannel> {
+  requireServerWideManageChannels(guild, {
+    description: 'intake channel',
+    option: 'intake-channel',
+    permissions: INTAKE_CHANNEL_PERMISSIONS,
+  });
   return guild.channels.create({
     name: 'open-a-ticket',
     type: ChannelType.GuildText,
     topic: 'Type your question here to open a private ticket.',
-    permissionOverwrites: [{ id: botId(guild), allow: [...INTAKE_CHANNEL_PERMISSIONS] }],
+    permissionOverwrites: [
+      {
+        id: botId(guild),
+        allow: grantablePermissions(botGuildPermissions(guild), INTAKE_CHANNEL_PERMISSIONS),
+      },
+    ],
     reason: 'Ticket setup',
   });
 }
 
-export function createStaffTextChannel(guild: Guild, name: string): Promise<TextChannel> {
+export function createStaffTextChannel(
+  guild: Guild,
+  name: string,
+  option: string,
+): Promise<TextChannel> {
+  requireServerWideManageChannels(guild, {
+    description: `#${name} channel`,
+    option,
+    permissions: LOG_CHANNEL_PERMISSIONS,
+  });
   return guild.channels.create({
     name,
     type: ChannelType.GuildText,
@@ -92,11 +129,20 @@ export function createStaffTextChannel(guild: Guild, name: string): Promise<Text
   });
 }
 
-export function createStaffCategory(guild: Guild, name: string): Promise<CategoryChannel> {
+export function createStaffCategory(
+  guild: Guild,
+  name: string,
+  option: string,
+): Promise<CategoryChannel> {
+  requireServerWideManageChannels(guild, {
+    description: `${name} category`,
+    option,
+    permissions: TICKET_CATEGORY_PERMISSIONS,
+  });
   return guild.channels.create({
     name,
     type: ChannelType.GuildCategory,
-    permissionOverwrites: hiddenFromEveryone(guild, TICKET_CATEGORY_BOT_PERMISSIONS),
+    permissionOverwrites: hiddenFromEveryone(guild, TICKET_CATEGORY_PERMISSIONS),
     reason: 'Ticket bot setup',
   });
 }

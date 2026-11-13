@@ -1,43 +1,19 @@
 import {
   OverwriteType,
-  PermissionFlagsBits,
   PermissionsBitField,
   type Client,
   type Guild,
-  type OverwriteData,
   type OverwriteResolvable,
   type PermissionOverwriteOptions,
   type TextChannel,
 } from 'discord.js';
 import { logger } from '../core/logger.js';
-import { TICKET_MEMBER_PERMISSIONS, TICKET_STAFF_PERMISSIONS } from '../core/permissions.js';
+import { botGuildPermissions, TICKET_MEMBER_PERMISSIONS } from '../core/permissions.js';
 import { getParticipantIds } from '../db/queries.js';
 import type { ClientServer, Ticket } from '../db/schema.js';
 import { fetchTicketChannel } from '../relay/channels.js';
 import { getActiveTicketsOfClient } from './repo.js';
-
-/** What the bot grants itself in each client ticket channel. */
-export const BOT_TICKET_PERMISSIONS = [
-  ...TICKET_STAFF_PERMISSIONS,
-  PermissionFlagsBits.ManageChannels,
-  PermissionFlagsBits.ManageWebhooks,
-] as const;
-
-interface ClientTicketOverwriteInput {
-  guildId: string;
-  botId: string;
-  openerId: string;
-  staffRoleIds: readonly string[];
-}
-
-export function clientTicketOverwrites(input: ClientTicketOverwriteInput): OverwriteData[] {
-  return [
-    { id: input.guildId, type: OverwriteType.Role, deny: [PermissionFlagsBits.ViewChannel] },
-    { id: input.botId, type: OverwriteType.Member, allow: BOT_TICKET_PERMISSIONS },
-    { id: input.openerId, type: OverwriteType.Member, allow: TICKET_MEMBER_PERMISSIONS },
-    ...input.staffRoleIds.map((id) => staffRoleOverwrite(id)),
-  ];
-}
+import { staffRoleOverwrite } from './ticketOverwrites.js';
 
 /** Overwrites for roles that were deleted from the server would make Discord reject the request. */
 export function existingRoleIds(guild: Guild, roleIds: readonly string[]): string[] {
@@ -98,11 +74,8 @@ function withStaffRoles(channel: TextChannel, staffRoleIds: string[]): Overwrite
   const kept = channel.permissionOverwrites.cache.filter(
     (overwrite) => overwrite.type === OverwriteType.Member || overwrite.id === channel.guild.id,
   );
-  return [...kept.values(), ...staffRoleIds.map((id) => staffRoleOverwrite(id))];
-}
-
-function staffRoleOverwrite(roleId: string): OverwriteData {
-  return { id: roleId, type: OverwriteType.Role, allow: TICKET_STAFF_PERMISSIONS };
+  const botPermissions = botGuildPermissions(channel.guild);
+  return [...kept.values(), ...staffRoleIds.map((id) => staffRoleOverwrite(id, botPermissions))];
 }
 
 function permissionOptions(
