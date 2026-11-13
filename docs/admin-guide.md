@@ -206,6 +206,7 @@ The `/ticket` command works only in a ticket channel. The bot finds the ticket f
 | `/ticket add <user>` | Opener, client staff, participants (only if `participants-can-add` is on) | Not available | Open |
 | `/ticket remove <user>` | Opener, client staff, participants (only if `participants-can-add` is on) | Not available | Open |
 | `/ticket close [reason]` | Opener, client staff | Hub staff | Open |
+| `/ticket close now:True` | No | Hub staff | Open |
 | `/ticket reopen` | Opener (only below `max-open-tickets`), client staff | Hub staff | Closed, during the grace period |
 | `/ticket info` | All members who can see the channel | All members who can see the channel | All |
 | `/ticket claim` | Not available | Hub staff | Open |
@@ -217,6 +218,8 @@ The `/ticket` command works only in a ticket channel. The bot finds the ticket f
 Details:
 
 - `/ticket close`: the reason can have a maximum of 500 characters.
+- `/ticket close now:True`: closes the ticket at once, with no grace period. Nobody can reopen the ticket. The bot sends the transcripts and then removes the channels. Only hub staff can use this option, in the hub ticket channel.
+- On the hub side, the close confirmation also shows the button **Close now (no reopen)**. It does the same as `now:True`.
 - `/ticket reopen`: the bot refuses a reopen by the opener if the opener already has the maximum number of open tickets. Staff can always reopen.
 - `/ticket transfer`: the new staff member must also be hub staff for this ticket.
 - `/ticket note`: posts an "Internal note" embed in the hub ticket channel. The note can have a maximum of 4,000 characters. The bot does not relay it.

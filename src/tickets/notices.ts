@@ -93,6 +93,7 @@ export async function postCloseNotices(
   ticket: Ticket,
   closer: Actor | null,
   hub: HubConfig,
+  { reopenable }: { reopenable: boolean },
 ): Promise<void> {
   const closingUntil = ticket.closingUntil ?? new Date();
   await Promise.all(
@@ -106,7 +107,7 @@ export async function postCloseNotices(
       });
       return sendToTicketChannel(client, ticket, side, {
         embeds: [noticeEmbed(text, Colors.closing)],
-        components: [reopenButtonRow(ticket.id)],
+        components: reopenable ? [reopenButtonRow(ticket.id)] : [],
       });
     }),
   );

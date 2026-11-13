@@ -271,6 +271,8 @@ In the client ticket channel, the opener and client staff can close a ticket. In
 ### Close procedure
 
 1. A user clicks **🔒 Close**. An ephemeral confirmation shows "Close this ticket? It can be reopened for N minutes." It has two buttons: **Close** and **Close with reason**. **Close with reason** opens a modal with a required reason (maximum 500 characters). `/ticket close [reason]` closes with no confirmation.
+
+   Hub staff can also close a ticket at once. On the hub side, the confirmation has a third button, **Close now (no reopen)**. `/ticket close now:True` does the same. There is no grace period and no Reopen button. The bot sends the transcripts and then finalizes the ticket immediately.
 2. The ticket status changes to `closing`, and the bot sets `closed_at`. In the client ticket channel, the bot removes the Send Messages permission from the opener and participants.
 3. The two sides get the notice "🔒 Ticket closed by X.", the reason, and the time when the bot deletes or archives the channel. In the client server, X is a mention or the staff label (section 7). An automatic close shows "Ticket closed automatically."
 4. **Transcripts:** the bot makes HTML files (with `discord-html-transcripts`) immediately:
@@ -366,7 +368,7 @@ The `server` option has autocomplete. It also accepts a server ID or a tag.
 | Command | Side | Who | Purpose |
 |---|---|---|---|
 | `/ticket add <user>`, `/ticket remove <user>` | Client only | Opener, client staff, participants if `participants_can_add` is on | Adds or removes participants. |
-| `/ticket close [reason]` | Both | Client: opener, client staff. Hub: hub staff. | Closes the ticket. |
+| `/ticket close [reason] [now]` | Both | Client: opener, client staff. Hub: hub staff. `now` is for hub staff only. | Closes the ticket. With `now`, closes it at once with no reopen. |
 | `/ticket reopen` | Both | Client: opener, client staff. Hub: hub staff. | Reopens the ticket during the grace period. |
 | `/ticket info` | Both | All members who can see the channel | Shows the ticket details. |
 | `/ticket claim`, `/ticket unclaim`, `/ticket transfer <staff>` | Hub only | Hub staff | Changes the claim. |

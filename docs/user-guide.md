@@ -139,6 +139,8 @@ To give a reason, do these steps instead:
 
 You can also use the command `/ticket close [reason]`.
 
+NOTE: The support team can close a ticket at once. Then you cannot reopen it, and the ticket channel goes away immediately. You still receive the transcript.
+
 The opener, the server staff, and the support team can close a ticket. Participants cannot close a ticket.
 
 After the close, these things occur:

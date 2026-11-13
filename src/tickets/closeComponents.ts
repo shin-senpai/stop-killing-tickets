@@ -16,6 +16,7 @@ import type { ComponentHandler, ComponentInteraction } from '../core/module.js';
 import { getHubConfig } from '../db/queries.js';
 import type { Ticket } from '../db/schema.js';
 import {
+  isTicketStaff,
   requireCanCloseOrReopen,
   requireOpen,
   requireReopenWithinLimit,
@@ -47,8 +48,8 @@ function confirmText(): string {
   return `Close this ticket? It can be reopened for ${graceMinutes} minute${graceMinutes === 1 ? '' : 's'}.`;
 }
 
-function confirmRow(ticketId: number): ActionRowBuilder<ButtonBuilder> {
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+function confirmRow(ticketId: number, canCloseNow: boolean): ActionRowBuilder<ButtonBuilder> {
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(customId(TicketComponentIds.closeConfirm, ticketId))
       .setLabel('Close')
@@ -58,6 +59,19 @@ function confirmRow(ticketId: number): ActionRowBuilder<ButtonBuilder> {
       .setLabel('Close with reason')
       .setStyle(ButtonStyle.Secondary),
   );
+  if (canCloseNow) {
+    row.addComponents(
+      new ButtonBuilder()
+        .setCustomId(customId(TicketComponentIds.closeNow, ticketId))
+        .setLabel('Close now (no reopen)')
+        .setStyle(ButtonStyle.Danger),
+    );
+  }
+  return row;
+}
+
+function canCloseNow(interaction: ComponentInteraction, scope: TicketScope): boolean {
+  return scope.side === 'hub' && isTicketStaff(interaction.member, scope);
 }
 
 function reasonModal(ticketId: number): ModalBuilder {
@@ -80,11 +94,11 @@ function reasonModal(ticketId: number): ModalBuilder {
 const closeButton: ComponentHandler = {
   id: TicketComponentIds.close,
   async handle(interaction, [ticketId]) {
-    const ticket = ticketForAction(interaction, ticketId);
-    requireOpen(ticket);
+    const scope = scopeForAction(interaction, ticketId);
+    requireOpen(scope.ticket);
     await interaction.reply({
       content: confirmText(),
-      components: [confirmRow(ticket.id)],
+      components: [confirmRow(scope.ticket.id, canCloseNow(interaction, scope))],
       flags: MessageFlags.Ephemeral,
     });
   },
@@ -99,6 +113,23 @@ const closeConfirmButton: ComponentHandler = {
     await interaction.update({ content: 'Closing the ticket…', components: [] });
     await closeTicket(interaction.client, ticket, interaction.user, null);
     await interaction.editReply({ content: 'Ticket closed.' });
+  },
+};
+
+const closeNowButton: ComponentHandler = {
+  id: TicketComponentIds.closeNow,
+  async handle(interaction, [ticketId]) {
+    if (!interaction.isButton()) return;
+    const scope = scopeForAction(interaction, ticketId);
+    if (!canCloseNow(interaction, scope)) {
+      throw new UserFacingError('Only hub staff can close a ticket at once.');
+    }
+    requireOpen(scope.ticket);
+    await interaction.update({ content: 'Closing the ticket for good…', components: [] });
+    await closeTicket(interaction.client, scope.ticket, interaction.user, null, {
+      immediate: true,
+    });
+    await interaction.editReply({ content: 'Ticket closed for good.' });
   },
 };
 
@@ -160,6 +191,7 @@ const reopenButton: ComponentHandler = {
 export const lifecycleComponents: ComponentHandler[] = [
   closeButton,
   closeConfirmButton,
+  closeNowButton,
   closeWithReason,
   reopenButton,
 ];

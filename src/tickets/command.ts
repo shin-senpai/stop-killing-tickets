@@ -59,6 +59,9 @@ const data = new SlashCommandBuilder()
       .setDescription('Close this ticket')
       .addStringOption((o) =>
         o.setName('reason').setDescription('Why it is closed').setMaxLength(REASON_LIMIT),
+      )
+      .addBooleanOption((o) =>
+        o.setName('now').setDescription('Hub staff only: close for good, with no reopen'),
       ),
   )
   .addSubcommand((sub) => sub.setName('reopen').setDescription('Reopen this ticket'))
@@ -118,9 +121,16 @@ const handlers: Record<string, SubcommandHandler> = {
     requireCanCloseOrReopen(interaction.member, scope);
     requireOpen(scope.ticket);
     const reason = interaction.options.getString('reason');
+    const immediate = interaction.options.getBoolean('now') ?? false;
+    if (immediate) {
+      requireSide(scope, 'hub');
+      requireStaff(interaction.member, scope);
+    }
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    await closeTicket(interaction.client, scope.ticket, interaction.user, reason);
-    await interaction.editReply('The ticket is closed.');
+    await closeTicket(interaction.client, scope.ticket, interaction.user, reason, { immediate });
+    await interaction.editReply(
+      immediate ? 'The ticket is closed for good.' : 'The ticket is closed.',
+    );
   },
 
   async reopen(interaction, scope) {
