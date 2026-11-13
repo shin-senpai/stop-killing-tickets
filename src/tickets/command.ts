@@ -127,10 +127,14 @@ const handlers: Record<string, SubcommandHandler> = {
       requireStaff(interaction.member, scope);
     }
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-    await closeTicket(interaction.client, scope.ticket, interaction.user, reason, { immediate });
-    await interaction.editReply(
-      immediate ? 'The ticket is closed for good.' : 'The ticket is closed.',
-    );
+    if (immediate) {
+      // Reply first: the channel that holds this reply is deleted by the close.
+      await interaction.editReply('Closing the ticket for good…');
+      await closeTicket(interaction.client, scope.ticket, interaction.user, reason, { immediate });
+      return;
+    }
+    await closeTicket(interaction.client, scope.ticket, interaction.user, reason);
+    await interaction.editReply('The ticket is closed.');
   },
 
   async reopen(interaction, scope) {

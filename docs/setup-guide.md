@@ -76,10 +76,11 @@ The bot role needs these server-wide permissions in each server. The list comes 
 | Embed Links | Post embeds. |
 | Attach Files | Upload attachments and transcripts. |
 | Read Message History | Read messages for catch-up and transcripts. |
-| Manage Messages | Delete intake messages and pin starter messages. |
+| Manage Messages | Delete intake messages and the pin notices. |
+| Pin Messages | Pin the intake message and the starter messages. Discord moved pinning out of Manage Messages into this permission. |
 | Add Reactions | Mark internal notes with the 🔒 reaction. |
 
-The permission integer for this list is `805432400`.
+The permission integer for this list is `2251800619117648`.
 
 NOTE: Discord lets a bot set permission overwrites on a new channel only for the permissions that the bot has in the server. Permissions on a category do not count. Thus, the bot role must have these permissions server-wide. The scopes are `bot` and `applications.commands`.
 
@@ -92,7 +93,7 @@ Use one of these two methods to make the invite link.
 1. Copy this link:
 
    ```
-   https://discord.com/oauth2/authorize?client_id=APPLICATION_ID&scope=bot%20applications.commands&permissions=805432400
+   https://discord.com/oauth2/authorize?client_id=APPLICATION_ID&scope=bot%20applications.commands&permissions=2251800619117648
    ```
 
 2. Replace `APPLICATION_ID` with the Application ID from section 2.
@@ -102,7 +103,7 @@ Use one of these two methods to make the invite link.
 1. In the Developer Portal, click **OAuth2** in the menu.
 2. Find the **OAuth2 URL Generator** section.
 3. Select the scopes `bot` and `applications.commands`.
-4. In **Bot Permissions**, select the ten permissions in the table above.
+4. In **Bot Permissions**, select the eleven permissions in the table above.
 5. Copy the generated URL at the bottom of the page.
 
 Use the same invite link for the hub server and for all client servers.

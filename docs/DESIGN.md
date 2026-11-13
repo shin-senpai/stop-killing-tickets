@@ -452,7 +452,8 @@ Webhook tokens are credentials. Thus, the database file must not be readable by 
 - Embed Links
 - Attach Files
 - Read Message History
-- Manage Messages (to delete intake messages and to pin)
+- Manage Messages (to delete intake messages and pin notices)
+- Pin Messages (to pin the intake message and the starter messages)
 - Add Reactions
 
 The bot can only give permissions that it has. Thus, `/config check` examines the permissions of the bot.

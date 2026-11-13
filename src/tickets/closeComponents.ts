@@ -125,11 +125,11 @@ const closeNowButton: ComponentHandler = {
       throw new UserFacingError('Only hub staff can close a ticket at once.');
     }
     requireOpen(scope.ticket);
+    // No reply after the close: the channel that holds this reply is deleted.
     await interaction.update({ content: 'Closing the ticket for good…', components: [] });
     await closeTicket(interaction.client, scope.ticket, interaction.user, null, {
       immediate: true,
     });
-    await interaction.editReply({ content: 'Ticket closed for good.' });
   },
 };
 

@@ -23,6 +23,8 @@ export const BOT_SERVER_PERMISSIONS = [
   PermissionFlagsBits.AttachFiles,
   PermissionFlagsBits.ReadMessageHistory,
   PermissionFlagsBits.ManageMessages,
+  // Discord split pinning out of Manage Messages into its own permission.
+  PermissionFlagsBits.PinMessages,
   PermissionFlagsBits.AddReactions,
 ] as const;
 
@@ -37,6 +39,7 @@ export const INTAKE_CHANNEL_PERMISSIONS = [
   PermissionFlagsBits.EmbedLinks,
   PermissionFlagsBits.ReadMessageHistory,
   PermissionFlagsBits.ManageMessages,
+  PermissionFlagsBits.PinMessages,
   PermissionFlagsBits.AddReactions,
 ] as const;
 
@@ -61,6 +64,7 @@ export const TICKET_MEMBER_PERMISSIONS = [
 export const TICKET_STAFF_PERMISSIONS = [
   ...TICKET_MEMBER_PERMISSIONS,
   PermissionFlagsBits.ManageMessages,
+  PermissionFlagsBits.PinMessages,
 ] as const;
 
 /** Names of the permissions in `required` that are not in `held`. */
