@@ -83,6 +83,8 @@ The permission integer for this list is `805432400`.
 
 NOTE: Discord lets a bot set permission overwrites on a new channel only for the permissions that the bot has in the server. Permissions on a category do not count. Thus, the bot role must have these permissions server-wide. The scopes are `bot` and `applications.commands`.
 
+TIP: When the bot is in the hub server, run `/hub invite` in the hub server. The bot shows the full invite link with the correct permissions.
+
 Use one of these two methods to make the invite link.
 
 **Method A: write the link yourself.**

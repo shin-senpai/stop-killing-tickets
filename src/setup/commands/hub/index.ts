@@ -11,6 +11,7 @@ import {
   viewHubConfig,
 } from './config.js';
 import { hubCommandData } from './definition.js';
+import { showInviteLink } from './invite.js';
 import { setupHub } from './setup.js';
 import { addHubStaffRole, listHubStaffRoles, removeHubStaffRole } from './staffRoles.js';
 
@@ -21,6 +22,7 @@ export const hubCommand: SlashCommand = {
     requireHubAdmin(interaction.member);
     await runSubcommand(interaction, {
       setup: setupHub,
+      invite: showInviteLink,
       'config view': viewHubConfig,
       'config staff-identity': setStaffIdentity,
       'config note-prefix': setNotePrefix,

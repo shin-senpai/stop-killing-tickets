@@ -148,6 +148,9 @@ export const hubCommandData = new SlashCommandBuilder()
           .addChannelTypes(ChannelType.GuildText),
       ),
   )
+  .addSubcommand((sub) =>
+    sub.setName('invite').setDescription('Show the link to add me to a client server'),
+  )
   .addSubcommandGroup(hubConfigGroup)
   .addSubcommandGroup(staffRolesGroup)
   .toJSON();

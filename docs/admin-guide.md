@@ -113,6 +113,7 @@ Use these commands in the hub server.
 
 | Command | Description |
 |---|---|
+| `/hub invite` | Shows the invite link of the bot. Only you can see the reply. Use the link to add the bot to a client server. |
 | `/hub setup [log-channel] [transcript-channel]` | Sets the hub log channel and the transcript channel. If you do not set a channel, the bot uses the saved channel or creates `#ticket-log` and `#ticket-transcripts`. |
 | `/hub config view` | Shows all hub settings. |
 | `/hub config staff-identity <mode>` | Sets how the names of hub staff show to users. Refer to the table below. |
