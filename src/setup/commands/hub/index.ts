@@ -10,6 +10,7 @@ import {
   setStaffIdentity,
   viewHubConfig,
 } from './config.js';
+import { runHubHealthCheck } from './check.js';
 import { hubCommandData } from './definition.js';
 import { showInviteLink } from './invite.js';
 import { setupHub } from './setup.js';
@@ -23,6 +24,7 @@ export const hubCommand: SlashCommand = {
     await runSubcommand(interaction, {
       setup: setupHub,
       invite: showInviteLink,
+      check: runHubHealthCheck,
       'config view': viewHubConfig,
       'config staff-identity': setStaffIdentity,
       'config note-prefix': setNotePrefix,

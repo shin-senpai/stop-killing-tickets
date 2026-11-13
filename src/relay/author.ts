@@ -27,7 +27,7 @@ export async function resolveRelayAuthor(
       identity: clientAuthorIdentity({
         displayName,
         avatarURL,
-        serverName: message.guild.name,
+        serverLabel: server?.tag ?? message.guild.name,
         isStaff,
       }),
     };

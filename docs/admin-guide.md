@@ -113,6 +113,7 @@ Use these commands in the hub server.
 
 | Command | Description |
 |---|---|
+| `/hub check` | Shows a health check of the hub. Only you can see the reply. See [Hub health check](#hub-health-check). |
 | `/hub invite` | Shows the invite link of the bot. Only you can see the reply. Use the link to add the bot to a client server. |
 | `/hub setup [log-channel] [transcript-channel]` | Sets the hub log channel and the transcript channel. If you do not set a channel, the bot uses the saved channel or creates `#ticket-log` and `#ticket-transcripts`. |
 | `/hub config view` | Shows all hub settings. |
@@ -331,6 +332,20 @@ In the client server, run `/config check`. The bot shows these items:
 | Staff roles | No staff roles are set, or some roles were deleted. | Run `/config staff-roles add`. |
 
 In the result, ✅ shows a correct item, ⚠️ shows a warning, and ❌ shows an error.
+
+### Hub health check
+
+Run `/hub check` in the hub server. The bot shows one line for each item. A line with ❌ or ⚠️ shows a problem.
+
+| Item | The bot examines |
+|---|---|
+| My role | The bot role has all permissions from the invite link. |
+| Log channel, transcript channel | The channel is set, the channel exists, and the bot can send messages and files in it. |
+| Hub categories | The category of each client server exists, and the bot has its permissions there. The bot shows the number of channels (maximum 50). The bot examines a shared category one time. |
+| Archive category | Only if the archive mode is `move`. The same examination as a hub category. |
+| Channel count | The number of channels in the hub server (maximum 500). The bot shows a warning at 450. |
+| Hub staff roles | The roles exist. The bot removes deleted roles from the list. |
+| Client servers | The number of active, paused, and pending client servers. |
 
 ### 6.2 Missing permissions
 

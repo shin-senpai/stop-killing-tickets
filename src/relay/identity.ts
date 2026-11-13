@@ -10,13 +10,14 @@ export interface WebhookIdentity {
 export interface ClientAuthor {
   displayName: string;
   avatarURL: string | undefined;
-  serverName: string;
+  /** The client's tag, or the server name if it has no tag yet. */
+  serverLabel: string;
   isStaff: boolean;
 }
 
 /** How a client server member appears in the hub. */
 export function clientAuthorIdentity(author: ClientAuthor): WebhookIdentity {
-  const label = author.isStaff ? `${author.serverName} Staff` : author.serverName;
+  const label = author.isStaff ? `${author.serverLabel} Staff` : author.serverLabel;
   return {
     username: sanitizeWebhookUsername(`${author.displayName} (${label})`),
     avatarURL: author.avatarURL,

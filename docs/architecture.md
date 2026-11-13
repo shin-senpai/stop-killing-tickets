@@ -335,7 +335,7 @@ The staff identity mode (`hub_config.staff_identity`) controls how hub staff sho
 | `src/core/staffLabel.ts` | `staffLabel(mode, profile)` | The label in notices and in the client starter embed: `Bob`, `Support Team (Moderator)`, or `Support Team`. |
 | `src/core/staffIdentity.ts` | `resolveStaffLabel(client, userId)` | Gets the hub member and the current mode, then calls `staffLabel`. |
 | `src/relay/identity.ts` | `hubAuthorIdentity(mode, author)` | The webhook name of a relayed hub message: `Bob · Support`, `Support Team · Moderator`, or `Support Team` with the hub icon. |
-| `src/relay/identity.ts` | `clientAuthorIdentity(author)` | The webhook name of a relayed client message: `Ana (Acme Gaming)`, or `Ana (Acme Gaming Staff)` for client staff. |
+| `src/relay/identity.ts` | `clientAuthorIdentity(author)` | The webhook name of a relayed client message: `Ana (acme)`, or `Ana (acme Staff)` for client staff. The label is the client tag, or the server name if the client has no tag. |
 
 If the member has no role above @everyone, the `role` mode uses only `Support Team`. If the bot cannot find the member, `staffLabel` also returns `Support Team`.
 

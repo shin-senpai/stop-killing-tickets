@@ -1,6 +1,6 @@
 import { EmbedBuilder, MessageFlags, type Guild, type TextChannel } from 'discord.js';
 import { Colors } from '../../../core/colors.js';
-import { CATEGORY_CHANNEL_LIMIT } from '../../../core/limits.js';
+import { CATEGORY_CHANNEL_LIMIT, CATEGORY_WARNING_COUNT } from '../../../core/limits.js';
 import type { ClientServer } from '../../../db/schema.js';
 import {
   childChannelCount,
@@ -15,13 +15,11 @@ import { missingPermissionLine, missingServerPermissionLine } from '../../permis
 import { saveClientServer } from '../../repo.js';
 import { replyPrivately, type CommandInteraction } from '../subcommands.js';
 
-const CATEGORY_WARNING_THRESHOLD = 45;
-
 function checkCategory(guild: Guild, server: ClientServer): string[] {
   const category = findCategory(guild, server.ticketCategoryId);
   if (!category) return ['❌ The ticket category is missing. Set one with `/config category`.'];
   const count = childChannelCount(category);
-  const icon = count >= CATEGORY_WARNING_THRESHOLD ? '⚠️' : '✅';
+  const icon = count >= CATEGORY_WARNING_COUNT ? '⚠️' : '✅';
   return [
     `${icon} ${category} has ${count}/${CATEGORY_CHANNEL_LIMIT} channels.`,
     missingPermissionLine(category) ?? `✅ I have everything I need in ${category}.`,

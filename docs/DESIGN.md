@@ -48,7 +48,7 @@ sequenceDiagram
     B->>H: Post + pin starter embed with user info [Claim] [Close] [Info], then the opening files
     B-->>S: Temporary notice "@User, your ticket is open: #ticket-0042-user" (deleted after 10 s)
     U->>S: Message in #ticket-0042
-    B->>H: Relay with webhook as "User (Acme Gaming)"
+    B->>H: Relay with webhook as "User (acme)"
     H->>B: Staff replies in #acme-0042
     B->>S: Relay with webhook as "Bob · Support"
 ```
@@ -237,7 +237,7 @@ Staff must often discuss a ticket, and the user must not see this discussion. Th
 
 ### Names on relayed messages
 
-- Client server to hub server: `DisplayName (Acme Gaming)`. The suffix is the name of the client server. Client staff show as `DisplayName (Acme Gaming Staff)`.
+- Client server to hub server: `DisplayName (acme)`. The suffix is the tag of the client server. If the client server has no tag, the suffix is the server name. Client staff show as `DisplayName (acme Staff)`.
 - Hub server to client server: the **staff identity mode** (a hub setting) controls the name:
 
 | Mode | Webhook name | Label in notices and in the client starter embed |
@@ -514,7 +514,7 @@ These decisions are final:
 |---|---|
 | Names | "Hub server" and "client server". |
 | Default staff identity | `named`. |
-| Client staff can reply in tickets | Yes. The bot relays their messages with the label "(Acme Gaming Staff)". |
+| Client staff can reply in tickets | Yes. The bot relays their messages with the label "(acme Staff)". The label uses the client tag. |
 | Stack | TypeScript and discord.js. |
 | Hub staff roles | Optional. `/hub staff-roles` sets them. |
 | Add and remove participants | Only on the client side. The hub side cannot add or remove people. |

@@ -151,6 +151,9 @@ export const hubCommandData = new SlashCommandBuilder()
   .addSubcommand((sub) =>
     sub.setName('invite').setDescription('Show the link to add me to a client server'),
   )
+  .addSubcommand((sub) =>
+    sub.setName('check').setDescription('Check hub channels, categories and permissions'),
+  )
   .addSubcommandGroup(hubConfigGroup)
   .addSubcommandGroup(staffRolesGroup)
   .toJSON();

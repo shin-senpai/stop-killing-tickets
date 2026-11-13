@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { clientAuthorIdentity, hubAuthorIdentity, type HubAuthor } from './identity.js';
 
 describe('clientAuthorIdentity', () => {
-  const base = { displayName: 'Alice', avatarURL: 'a.png', serverName: 'Acme', isStaff: false };
+  const base = { displayName: 'Alice', avatarURL: 'a.png', serverLabel: 'acme', isStaff: false };
 
-  it('adds the server name', () => {
-    expect(clientAuthorIdentity(base)).toEqual({ username: 'Alice (Acme)', avatarURL: 'a.png' });
+  it('adds the client label', () => {
+    expect(clientAuthorIdentity(base)).toEqual({ username: 'Alice (acme)', avatarURL: 'a.png' });
   });
 
   it('labels client staff', () => {
-    expect(clientAuthorIdentity({ ...base, isStaff: true }).username).toBe('Alice (Acme Staff)');
+    expect(clientAuthorIdentity({ ...base, isStaff: true }).username).toBe('Alice (acme Staff)');
   });
 
   it('sanitizes the name', () => {
-    expect(clientAuthorIdentity({ ...base, serverName: 'Discord Fans' }).username).toBe(
+    expect(clientAuthorIdentity({ ...base, serverLabel: 'Discord Fans' }).username).toBe(
       'Alice (Disc0rd Fans)',
     );
   });

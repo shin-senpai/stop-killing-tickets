@@ -1,5 +1,6 @@
 import type { Client, GuildMember } from 'discord.js';
 import { fetchHubGuild, sendHubLog } from '../core/hub.js';
+import { GUILD_CHANNEL_LIMIT, GUILD_CHANNEL_WARNING_COUNT } from '../core/limits.js';
 import { logger } from '../core/logger.js';
 import type { ClientServer, Ticket } from '../db/schema.js';
 import { hubChannelName, clientChannelName, hubChannelTopic } from './names.js';
@@ -9,7 +10,6 @@ import { postStarterMessages } from './starter.js';
 import { createRelayWebhook } from '../relay/webhooks.js';
 import { createClientTicketChannel, createHubTicketChannel } from './channels.js';
 
-const HUB_CHANNEL_WARNING_COUNT = 450;
 const HUB_CHANNEL_WARNING_INTERVAL_MS = 60 * 60 * 1000;
 
 export interface TicketRequest {
@@ -109,11 +109,11 @@ async function rollBack(undo: Undo[]): Promise<void> {
 }
 
 async function warnIfHubIsNearlyFull(client: Client<true>, channelCount: number): Promise<void> {
-  if (channelCount < HUB_CHANNEL_WARNING_COUNT) return;
+  if (channelCount < GUILD_CHANNEL_WARNING_COUNT) return;
   if (Date.now() - lastHubChannelWarningAt < HUB_CHANNEL_WARNING_INTERVAL_MS) return;
   lastHubChannelWarningAt = Date.now();
   await sendHubLog(client, {
-    content: `⚠️ The hub server has ${channelCount} of 500 channels. Close or archive tickets to make room.`,
+    content: `⚠️ The hub server has ${channelCount} of ${GUILD_CHANNEL_LIMIT} channels. Close or archive tickets to make room.`,
     allowedMentions: { parse: [] },
   });
 }
