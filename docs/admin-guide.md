@@ -222,6 +222,7 @@ Details:
 - `/ticket close`: the reason can have a maximum of 500 characters.
 - `/ticket close now:True`: closes the ticket at once, with no grace period. Nobody can reopen the ticket. The bot sends the transcripts and then removes the channels. Only hub staff can use this option, in the hub ticket channel.
 - On the hub side, the close confirmation also shows the button **Close now (no reopen)**. It does the same as `now:True`.
+- During the grace period, the hub side shows **Close now** next to **Reopen**. Only hub staff can use it. It ends the grace period at once, and nobody can reopen the ticket after that.
 - `/ticket reopen`: the bot refuses a reopen by the opener if the opener already has the maximum number of open tickets. Staff can always reopen.
 - `/ticket transfer`: the new staff member must also be hub staff for this ticket.
 - `/ticket note`: posts an "Internal note" embed in the hub ticket channel. The note can have a maximum of 4,000 characters. The bot does not relay it.

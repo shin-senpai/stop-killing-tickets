@@ -191,7 +191,8 @@ function hubButtons(ticket: Ticket): ActionRowBuilder<ButtonBuilder> {
     .setEmoji('📄')
     .setStyle(ButtonStyle.Secondary);
   if (ticket.status === 'closed') return buttonRow(info);
-  if (ticket.status === 'closing') return buttonRow(reopenButton(ticket), info);
+  if (ticket.status === 'closing')
+    return buttonRow(reopenButton(ticket), finalizeNowButton(ticket), info);
   const claim = new ButtonBuilder()
     .setCustomId(customId(TicketComponentIds.claim, ticket.id))
     .setLabel('Claim')
@@ -214,6 +215,13 @@ function reopenButton(ticket: Ticket): ButtonBuilder {
     .setLabel('Reopen')
     .setEmoji('🔓')
     .setStyle(ButtonStyle.Success);
+}
+
+export function finalizeNowButton(ticket: Pick<Ticket, 'id'>): ButtonBuilder {
+  return new ButtonBuilder()
+    .setCustomId(customId(TicketComponentIds.finalizeNow, ticket.id))
+    .setLabel('Close now')
+    .setStyle(ButtonStyle.Danger);
 }
 
 function buttonRow(...buttons: ButtonBuilder[]): ActionRowBuilder<ButtonBuilder> {

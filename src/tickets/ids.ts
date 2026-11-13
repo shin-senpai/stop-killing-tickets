@@ -7,6 +7,7 @@ export const TicketComponentIds = {
   close: 'ticketClose',
   closeConfirm: 'ticketCloseConfirm',
   closeNow: 'ticketCloseNow',
+  finalizeNow: 'ticketFinalizeNow',
   closeReasonModal: 'ticketCloseReason',
   reopen: 'ticketReopen',
 } as const;

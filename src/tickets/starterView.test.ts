@@ -100,6 +100,7 @@ describe('starter buttons', () => {
     expect(customIds(renderClientStarter(makeContext(ticket)))).toEqual(['ticketReopen:7']);
     expect(customIds(renderHubStarter(makeContext(ticket)))).toEqual([
       'ticketReopen:7',
+      'ticketFinalizeNow:7',
       'ticketInfo:7',
     ]);
   });

@@ -24,6 +24,7 @@ import {
   type TicketScope,
 } from './access.js';
 import { closeTicket, reopenTicket } from './close.js';
+import { finalizeNow } from './finalize.js';
 import { TicketComponentIds } from './ids.js';
 
 const REASON_INPUT_ID = 'reason';
@@ -133,6 +134,27 @@ const closeNowButton: ComponentHandler = {
   },
 };
 
+const finalizeNowButtonHandler: ComponentHandler = {
+  id: TicketComponentIds.finalizeNow,
+  async handle(interaction, [ticketId]) {
+    if (!interaction.isButton()) return;
+    const scope = scopeForAction(interaction, ticketId);
+    if (!canCloseNow(interaction, scope)) {
+      throw new UserFacingError('Only hub staff can close a ticket at once.');
+    }
+    if (scope.ticket.status !== 'closing') {
+      throw new UserFacingError('This ticket is not waiting to close.');
+    }
+    await interaction.deferUpdate();
+    await finalizeNow(interaction.client, scope.ticket.id);
+    // In archive mode the channel survives, so the close notice loses its buttons.
+    // The starter is already re-rendered by the finalize. In delete mode the message is gone.
+    if (interaction.message.id !== scope.ticket.hubStarterMessageId) {
+      await interaction.editReply({ components: [] }).catch(() => undefined);
+    }
+  },
+};
+
 const closeWithReason: ComponentHandler = {
   id: TicketComponentIds.closeReasonModal,
   async handle(interaction, [ticketId]) {
@@ -192,6 +214,7 @@ export const lifecycleComponents: ComponentHandler[] = [
   closeButton,
   closeConfirmButton,
   closeNowButton,
+  finalizeNowButtonHandler,
   closeWithReason,
   reopenButton,
 ];

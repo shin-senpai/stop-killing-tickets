@@ -273,6 +273,8 @@ In the client ticket channel, the opener and client staff can close a ticket. In
 1. A user clicks **🔒 Close**. An ephemeral confirmation shows "Close this ticket? It can be reopened for N minutes." It has two buttons: **Close** and **Close with reason**. **Close with reason** opens a modal with a required reason (maximum 500 characters). `/ticket close [reason]` closes with no confirmation.
 
    Hub staff can also close a ticket at once. On the hub side, the confirmation has a third button, **Close now (no reopen)**. `/ticket close now:True` does the same. There is no grace period and no Reopen button. The bot sends the transcripts and then finalizes the ticket immediately.
+
+   During the grace period, the hub side shows **Close now** next to **Reopen**, on the close notice and on the starter message. Hub staff use it to end the grace period at once. The transcripts were already sent at the close, so the bot only finalizes the ticket.
 2. The ticket status changes to `closing`, and the bot sets `closed_at`. In the client ticket channel, the bot removes the Send Messages permission from the opener and participants.
 3. The two sides get the notice "🔒 Ticket closed by X.", the reason, and the time when the bot deletes or archives the channel. In the client server, X is a mention or the staff label (section 7). An automatic close shows "Ticket closed automatically."
 4. **Transcripts:** the bot makes HTML files (with `discord-html-transcripts`) immediately:

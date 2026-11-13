@@ -11,6 +11,7 @@ import { customId } from '../core/customId.js';
 import { resolveStaffLabel } from '../core/staffIdentity.js';
 import type { HubConfig, Ticket, TicketSide } from '../db/schema.js';
 import { sendToTicketChannel } from './channels.js';
+import { finalizeNowButton } from './starterView.js';
 import { TicketComponentIds } from './ids.js';
 import { closeNoticeText, reopenNoticeText, type Actor } from './noticeText.js';
 
@@ -74,14 +75,17 @@ export async function postTicketNotice(
   ]);
 }
 
-function reopenButtonRow(ticketId: number): ActionRowBuilder<ButtonBuilder> {
-  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+/** Only the hub side gets Close now, because only hub staff may end the grace period. */
+function reopenButtonRow(ticketId: number, side: TicketSide): ActionRowBuilder<ButtonBuilder> {
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(customId(TicketComponentIds.reopen, ticketId))
       .setLabel('Reopen')
       .setEmoji('🔓')
       .setStyle(ButtonStyle.Secondary),
   );
+  if (side === 'hub') row.addComponents(finalizeNowButton({ id: ticketId }));
+  return row;
 }
 
 function hubChannelFate(hub: HubConfig): 'deleted' | 'archived' {
@@ -107,7 +111,7 @@ export async function postCloseNotices(
       });
       return sendToTicketChannel(client, ticket, side, {
         embeds: [noticeEmbed(text, Colors.closing)],
-        components: reopenable ? [reopenButtonRow(ticket.id)] : [],
+        components: reopenable ? [reopenButtonRow(ticket.id, side)] : [],
       });
     }),
   );

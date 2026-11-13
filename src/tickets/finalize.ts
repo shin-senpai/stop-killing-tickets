@@ -45,6 +45,14 @@ export async function finalizeTicket(client: Client<true>, ticket: Ticket): Prom
   if (closed?.hubChannelId) await refreshStarterMessages(client, closed);
 }
 
+/** Ends the grace period of a closing ticket at once. Does nothing for other states. */
+export function finalizeNow(client: Client<true>, ticketId: number): Promise<void> {
+  return withTicketLock(ticketId, async () => {
+    const ticket = getTicket(ticketId);
+    if (ticket?.status === 'closing') await finalizeTicket(client, ticket);
+  });
+}
+
 export interface ImmediateClose {
   reason: string;
   /** The side that gets the notice and that the transcript is built from. */
